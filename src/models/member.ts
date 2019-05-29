@@ -27,7 +27,21 @@ export default class MemberService{
         });
     }
 
-    static findOneById(id: string, password: string){
+    static findOneById(id: string): Promise<Member>{
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM member where id=?';
+            connection.query(sql, [id], (err, result) => {
+                if(err)
+                    return reject(err);
+                if(!result || result.length === 0)
+                    return resolve(null);
+                const member = <Member>result[0];
+                return resolve(member);
+            });
+        });
+    }
+
+    static validateOne(id: string, password: string): Promise<Member>{
         return new Promise((resolve, reject) => {
             const sql = 'SELECT * FROM member where id=?';
             connection.query(sql, [id], (err, result) => {

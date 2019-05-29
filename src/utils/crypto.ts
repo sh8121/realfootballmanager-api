@@ -7,7 +7,7 @@ export interface ICryptoService{
 
 let cryptoService: ICryptoService = {
     encrypt: (str) => {
-        const encrypted = crypto.createHmac("sha1", config.secret)
+        const encrypted = crypto.createHmac('sha1', config.secret)
             .update(str)
             .digest('base64');
         return encrypted;
