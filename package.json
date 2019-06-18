@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && ts-node dist",
+    "start": "tsc && node dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/sh8121/realfootballmanager-api#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-bearer-token": "^2.4.0",
     "jsonwebtoken": "^8.5.1",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
+    "@types/cors": "^2.8.5",
     "@types/express": "^4.16.1",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/morgan": "^1.7.35",

@@ -1,11 +1,8 @@
 import * as jwt from 'jsonwebtoken';
-import MemberService, {Member} from '../../models/member';
+import { Member } from '../../models/member';
+import MemberService from '../../services/memberService';
+import crypto from '../../utils/crypto';
 import { Request, Response } from 'express';
-
-interface LoginRequest{
-    id: string,
-    password: string
-}
 
 export async function register(req: Request, res: Response){
     const newMember: Member = req.body;
@@ -29,9 +26,10 @@ export async function register(req: Request, res: Response){
     }
 
     try{
-        let member = await MemberService.findOneById(newMember.id);
+        let member = await MemberService.read(newMember.memberId);
         if(member)
             return onExist();
+        newMember.password = crypto.encrypt(newMember.password);
         await MemberService.create(newMember);
         return onSuccess();
     }
@@ -41,14 +39,14 @@ export async function register(req: Request, res: Response){
 }
 
 export async function login(req: Request, res: Response){
-    const {id, password}: LoginRequest = req.body;
+    const {memberId, password} = req.body;
     const secret = req.app.get('jwt-secret');
 
     function sign(member: Member): Promise<string>{
         return new Promise((resolve, reject) => {
             jwt.sign(
                 {
-                    _id: member.id,
+                    _id: member.memberId,
                     name: member.name
                 },
                 secret,
@@ -89,8 +87,10 @@ export async function login(req: Request, res: Response){
     }
 
     try{
-        let member = await MemberService.validateOne(id, password);
+        let member = await MemberService.read(memberId);
         if(!member)
+            return onNonExist();
+        if(member.password !== crypto.encrypt(password))
             return onNonExist();
         let token = await sign(member);
         return onSuccess(member, token);    
