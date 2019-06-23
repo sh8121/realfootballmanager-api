@@ -1,5 +1,5 @@
-export interface Team {
-    teamId: string;
-    name: string;
-    ownerId: string;
+export interface Team{
+    teamId: string,
+    password: string,
+    name: string
 }

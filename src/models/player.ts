@@ -1,6 +1,12 @@
+export enum Gender{
+    MALE,
+    FEMALE
+}
+
 export interface Player {
-    teamId: string;
-    memberId: string;
-    position: string;
-    backNumber: number;
+    playerId: string,
+    password: string,
+    name: string,
+    gender: Gender,
+    bornYear: number
 }

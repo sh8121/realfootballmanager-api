@@ -1,83 +1,102 @@
-import TeamService from '../../services/teamService';
+import * as jwt from 'jsonwebtoken';
+import crypto from '../../utils/crypto';
 import { Request, Response } from 'express';
 import { Team } from '../../models/team';
+import TeamService from '../../services/teamService';
 
-export async function create(req: Request, res: Response){
+export async function register(req: Request, res: Response){
+    const newTeam: Team = req.body;
+
     function onSuccess(){
         res.json({
-            message: '팀이 생성되었습니다.'
+            message: '가입되었습니다.'
         });
     }
 
     function onExist(){
         res.status(400).json({
-            message: '같은 팀이 이미 있습니다.'
+            message: '팀이 이미 존재합니다.'
         });
     }
 
-    function onError(err: Error){
+    function onError(error: Error){
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
     }
 
     try{
-        const newTeam: Team = req.body;
-        const team = await TeamService.read(newTeam.teamId);
+        
+        let team = await TeamService.read(newTeam.teamId);
         if(team)
             return onExist();
-        newTeam.ownerId = req.app.get('info')._id;
+        newTeam.password = crypto.encrypt(newTeam.password);
         await TeamService.create(newTeam);
         return onSuccess();
     }
-    catch(err){
-        return onError(err)
+    catch(error){
+        return onError(error);
     }
 }
 
-export async function read(req: Request, res: Response){
-    function onSuccess(team: Team){
-        res.json({
-            team
+export async function login(req: Request, res: Response){
+    const {teamId, password} = req.body;
+    const secret = req.app.get('team-secret');
+
+    function sign(team: Team): Promise<string>{
+        return new Promise((resolve, reject) => {
+            jwt.sign(
+                {
+                    _id: team.teamId,
+                    name: team.name
+                },
+                secret,
+                {
+                    expiresIn: '1d',
+                    issuer: 'sboo.kr',
+                    subject: 'teamInfo'
+                },
+                (err, token) => {
+                    if(err)
+                        return reject(err);
+                    return resolve(token);
+                }
+            );
         });
     }
 
-    function onError(err: Error){
+    function onSuccess(team: Team, token: string){
+        res.json({
+            message: '로그인 되었습니다.',
+            team: {
+                name: team.name,
+                token
+            }
+        });
+    }
+
+    function onNonExist(){
+        res.status(400).json({
+            message: '팀이 존재하지 않습니다.'
+        });
+    }
+
+    function onError(error: Error){
         res.status(500).json({
-            message: err.message
+            message: error.message
         });
     }
 
     try{
-        const teamId = req.params.teamId;
-        const team: Team = await TeamService.read(teamId);
-        return onSuccess(team);
+        let team = await TeamService.read(teamId);
+        if(!team)
+            return onNonExist();
+        if(team.password !== crypto.encrypt(password))
+            return onNonExist();
+        let token = await sign(team);
+        return onSuccess(team, token);    
     }
-    catch(err){
-        return onError(err);
-    }
-}
-
-export async function readByOwnerId(req: Request, res: Response){
-    function onSuccess(teams: Team[]){
-        res.json({
-            teams
-        });
-    }
-
-    function onError(err: Error){
-        res.status(500).json({
-           message: err.message 
-        });
-    }
-
-    try{
-        const ownerId = req.app.get('info')._id;
-        const teams: Team[] = await TeamService.readByOwnerId(ownerId);
-        return onSuccess(teams);
-    }
-    catch(err){
-        return onError(err);
+    catch(error){
+        return onError(error);
     }
 }
-

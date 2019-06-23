@@ -1,9 +1,8 @@
 import { Router } from 'express'
-import { create, read, readByOwnerId } from './teamController'
+import { register, login } from './teamController'
 
 const router = Router();
-router.post('/', create);
-router.get('/ownedTeams', readByOwnerId);
-router.get('/:teamId', read);
+router.post('/register', register);
+router.get('/login', login);
 
 export default router;
