@@ -69,6 +69,7 @@ export async function login(req: Request, res: Response){
         res.json({
             message: '로그인 되었습니다.',
             team: {
+                teamId: team.teamId,
                 name: team.name,
                 token
             }
