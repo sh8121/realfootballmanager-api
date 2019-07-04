@@ -3,6 +3,7 @@ import crypto from '../../utils/crypto';
 import { Request, Response } from 'express';
 import { Team } from '../../models/team';
 import TeamService from '../../services/teamService';
+import { PlayerTeamRelation, PlayerTeamRelationEx } from '../../models/relation';
 
 export async function register(req: Request, res: Response){
     const newTeam: Team = req.body;
@@ -99,5 +100,66 @@ export async function login(req: Request, res: Response){
     }
     catch(error){
         return onError(error);
+    }
+}
+
+export async function registerPlayer(req: Request, res: Response){
+    const playerTeamRelation: PlayerTeamRelation = req.body;
+    
+    function onSuccess(){
+        res.json({
+            message: '선수가 등록되었습니다.'
+        });
+    }
+
+    function onError(err: Error){
+        res.status(500).json({
+            message: err.message
+        });
+    }
+
+    function onBadRequest(msg: string){
+        res.status(400).json({
+            message: msg
+        });
+    }
+
+    try{
+        const playerTeamRelationExes = await TeamService.readPlayers(playerTeamRelation.teamId);
+        for(let playerTeamRelationEx of playerTeamRelationExes){
+            if(playerTeamRelationEx.playerId === playerTeamRelation.playerId){
+                return onBadRequest('이미 등록된 선수입니다.');
+            }
+            if(playerTeamRelationEx.number === playerTeamRelation.number){
+                return onBadRequest('이미 등록된 번호입니다.');
+            }
+        }
+        await TeamService.createPlayer(playerTeamRelation);
+        return onSuccess();
+    }
+    catch(err){
+        return onError(err);
+    }
+}
+
+export async function findPlayers(req: Request, res: Response){
+    const { teamId } = req.params;
+    
+    function onSuccess(players: PlayerTeamRelationEx[]){
+        res.json(players);
+    }
+
+    function onError(err: Error){
+        res.status(500).json({
+            message: err.message
+        });
+    }
+
+    try{
+        const players = await TeamService.readPlayers(teamId);
+        return onSuccess(players);
+    }
+    catch(err){
+        return onError(err);
     }
 }

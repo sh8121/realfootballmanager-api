@@ -1,5 +1,5 @@
 import connection from '../utils/dbConnection';
-import { Player, Gender } from '../models/player';
+import { Player } from '../models/player';
 
 export default class PlayerService{
     static create(player: Player){
