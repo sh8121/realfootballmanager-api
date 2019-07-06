@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { Team } from '../../models/team';
 import TeamService from '../../services/teamService';
 import { PlayerTeamRelation, PlayerTeamRelationEx } from '../../models/relation';
+import config from '../../config';
 
 export async function register(req: Request, res: Response){
     const newTeam: Team = req.body;
@@ -27,7 +28,6 @@ export async function register(req: Request, res: Response){
     }
 
     try{
-        
         let team = await TeamService.read(newTeam.teamId);
         if(team)
             return onExist();
@@ -42,7 +42,7 @@ export async function register(req: Request, res: Response){
 
 export async function login(req: Request, res: Response){
     const {teamId, password} = req.body;
-    const secret = req.app.get('team-secret');
+    const secret = config.teamSecret;
 
     function sign(team: Team): Promise<string>{
         return new Promise((resolve, reject) => {
@@ -105,6 +105,8 @@ export async function login(req: Request, res: Response){
 
 export async function registerPlayer(req: Request, res: Response){
     const playerTeamRelation: PlayerTeamRelation = req.body;
+    const teamId = req.params.teamId;
+    playerTeamRelation.teamId = teamId;
     
     function onSuccess(){
         res.json({

@@ -3,6 +3,7 @@ import crypto from '../../utils/crypto';
 import { Request, Response } from 'express';
 import { Player } from '../../models/player';
 import PlayerService from '../../services/playerService';
+import config from '../../config';
 
 export async function register(req: Request, res: Response){
     const newPlayer: Player = req.body;
@@ -41,7 +42,7 @@ export async function register(req: Request, res: Response){
 
 export async function login(req: Request, res: Response){
     const {playerId, password} = req.body;
-    const secret = req.app.get('player-secret');
+    const secret = config.playerSecret;
 
     function sign(player: Player): Promise<string>{
         return new Promise((resolve, reject) => {

@@ -1,7 +1,8 @@
 import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
+import config from '../config'
 
-export const authMiddleware = (secretKey: string) => {
+const authMiddleware = (secretKey: string) => {
     return (req: Request, res: Response, next: any) => {
         const token: string = req.token;
         if(!token){
@@ -10,7 +11,7 @@ export const authMiddleware = (secretKey: string) => {
             });
         }
         
-        return jwt.verify(token, req.app.get(secretKey), (err: Error, decoded: any) => {
+        return jwt.verify(token, secretKey, (err: Error, decoded: any) => {
             if(err){
                 return res.status(403).json({
                     message: err.message
@@ -22,3 +23,6 @@ export const authMiddleware = (secretKey: string) => {
         });
     }
 }
+
+export const teamAuth = authMiddleware(config.teamSecret);
+export const playerAuth = authMiddleware(config.playerSecret);

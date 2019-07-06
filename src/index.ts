@@ -14,8 +14,6 @@ app.use(bearerToken())
     .use(bodyParser.json())
     .use(morgan('dev'))
     .use(cors())
-    .set('team-secret', config.teamSecret)
-    .set('player-secret', config.playerSecret);
 
 app.use('/api', api);
 
