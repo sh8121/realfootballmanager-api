@@ -1,103 +1,66 @@
-import * as jwt from 'jsonwebtoken';
-import crypto from '../../utils/crypto';
 import { Request, Response } from 'express';
 import { Player } from '../../models/player';
 import PlayerService from '../../services/playerService';
-import config from '../../config';
 
 export async function register(req: Request, res: Response){
     const newPlayer: Player = req.body;
-
+    const teamId = req.params.teamId;
+    newPlayer.teamId = teamId;
+    
     function onSuccess(){
         res.json({
-            message: '가입되었습니다.'
+            message: '선수가 등록되었습니다.'
         });
     }
 
-    function onExist(){
-        res.status(400).json({
-            message: '선수가 이미 존재합니다.'
-        });
-    }
-
-    function onError(error: Error){
+    function onError(err: Error){
         res.status(500).json({
-            message: error.message
+            message: err.message
+        });
+    }
+
+    function onBadRequest(msg: string){
+        res.status(400).json({
+            message: msg
         });
     }
 
     try{
-        
-        let player = await PlayerService.read(newPlayer.playerId);
-        if(player)
-            return onExist();
-        newPlayer.password = crypto.encrypt(newPlayer.password);
+        const players = await PlayerService.readByTeamId(newPlayer.teamId);
+        for(let player of players){
+            if(player.playerId === newPlayer.playerId){
+                return onBadRequest('이미 등록된 선수입니다.');
+            }
+            if(player.number === newPlayer.number){
+                return onBadRequest('이미 등록된 번호입니다.');
+            }
+        }
         await PlayerService.create(newPlayer);
         return onSuccess();
     }
-    catch(error){
-        return onError(error);
+    catch(err){
+        return onError(err);
     }
 }
 
-export async function login(req: Request, res: Response){
-    const {playerId, password} = req.body;
-    const secret = config.playerSecret;
-
-    function sign(player: Player): Promise<string>{
-        return new Promise((resolve, reject) => {
-            jwt.sign(
-                {
-                    _id: player.playerId,
-                    name: player.name
-                },
-                secret,
-                {
-                    expiresIn: '1d',
-                    issuer: 'sboo.kr',
-                    subject: 'playerInfo'
-                },
-                (err, token) => {
-                    if(err)
-                        return reject(err);
-                    return resolve(token);
-                }
-            );
-        });
+export async function findByTeam(req: Request, res: Response){
+    const { teamId } = req.params;
+    
+    function onSuccess(players: Player[]){
+        res.json(players);
     }
 
-    function onSuccess(player: Player, token: string){
-        res.json({
-            message: '로그인 되었습니다.',
-            player: {
-                name: player.name,
-                token
-            }
-        });
-    }
-
-    function onNonExist(){
-        res.status(400).json({
-            message: '선수가 존재하지 않습니다.'
-        });
-    }
-
-    function onError(error: Error){
+    function onError(err: Error){
         res.status(500).json({
-            message: error.message
+            message: err.message
         });
     }
 
     try{
-        let player = await PlayerService.read(playerId);
-        if(!player)
-            return onNonExist();
-        if(player.password !== crypto.encrypt(password))
-            return onNonExist();
-        let token = await sign(player);
-        return onSuccess(player, token);    
+        const players = await PlayerService.readByTeamId(teamId);
+        return onSuccess(players);
     }
-    catch(error){
-        return onError(error);
+    catch(err){
+        return onError(err);
     }
 }

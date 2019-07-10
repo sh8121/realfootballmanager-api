@@ -4,8 +4,8 @@ import { Player } from '../models/player';
 export default class PlayerService{
     static create(player: Player){
         return new Promise((resolve, reject) => {
-            const sql = 'INSERT INTO player(playerId, password, name, gender, bornYear) VALUES(?, ?, ?, ?, ?)';
-            connection.query(sql, [player.playerId, player.password, player.name, player.gender, player.bornYear], (err, result) => {
+            const sql = 'INSERT INTO player(teamId, playerId, name, number, position) VALUES(?, ?, ?, ?, ?)';
+            connection.query(sql, [player.teamId, player.playerId, player.name, player.number, player.position], (err, result) => {
                 if(err)
                     return reject(err);
                 return resolve(result);
@@ -22,6 +22,17 @@ export default class PlayerService{
                 if(!result || result.length === 0)
                     return resolve(null);                
                 return resolve(result[0]);
+            });
+        });
+    }
+
+    static readByTeamId(teamId: string): Promise<Player[]>{
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * from player where teamId=?';
+            connection.query(sql, [teamId], (err, result) => {
+                if(err)
+                    return reject(err);
+                return resolve(result);
             });
         });
     }

@@ -14,6 +14,7 @@ app.use(bearerToken())
     .use(bodyParser.json())
     .use(morgan('dev'))
     .use(cors())
+    .set('jwt-secret', config.jwtSecret)
 
 app.use('/api', api);
 

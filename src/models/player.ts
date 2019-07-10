@@ -1,12 +1,14 @@
-export enum Gender{
-    MALE,
-    FEMALE
+export enum Position {
+    GK = 'GK',
+    DF = 'DF',
+    MF = 'MF',
+    FW = 'FW'
 }
 
 export interface Player {
-    playerId: string,
-    password: string,
-    name: string,
-    gender: Gender,
-    bornYear: number
+    teamId: string;
+    playerId: string;
+    name: string;
+    number: number;
+    position: Position;
 }
