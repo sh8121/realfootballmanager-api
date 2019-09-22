@@ -36,7 +36,7 @@ export default class MatchService {
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
             connection.query(sql, 
                 [match.teamId, match.competitorName, match.teamScore, match.competitorScore,
-                match.goal, match.assist, match.shot, match.shotOnTarget, match.shutOff, match.clear, match.block, match.save,
+                match.goal, match.assist, match.shot, match.shotOnTarget, match.shutOff, match.clear, match.blocks, match.save,
                 match.foul, match.offside, match.yellowCard, match.redCard,
                 match.cornerKick, match.freeKick, match.panaltyKick, match.passMiss, match.controlMiss],
                 (err, result) => {
@@ -58,7 +58,7 @@ export default class MatchService {
             connection.query(sql, 
                 [playerInMatch.matchId, playerInMatch.teamId, playerInMatch.playerId,
                 playerInMatch.goal, playerInMatch.assist, playerInMatch.shot, playerInMatch.shotOnTarget, 
-                playerInMatch.shutOff, playerInMatch.clear, playerInMatch.block, playerInMatch.save,
+                playerInMatch.shutOff, playerInMatch.clear, playerInMatch.blocks, playerInMatch.save,
                 playerInMatch.foul, playerInMatch.offside, playerInMatch.yellowCard, playerInMatch.redCard,
                 playerInMatch.cornerKick, playerInMatch.freeKick, playerInMatch.panaltyKick, playerInMatch.passMiss, 
                 playerInMatch.controlMiss],

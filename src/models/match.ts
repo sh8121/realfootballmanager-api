@@ -5,7 +5,7 @@ interface MatchElement {
     shotOnTarget: number;
     shutOff: number
     clear: number;
-    block: number;
+    blocks: number;
     save: number;
     foul: number;
     offside: number;
