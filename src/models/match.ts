@@ -19,6 +19,7 @@ interface MatchElement {
 }
 
 export interface Match extends MatchElement {
+    matchId: number;
     teamId: string;
     competitorName: string;
     teamScore: number;
